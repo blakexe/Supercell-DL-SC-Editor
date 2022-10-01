@@ -5,7 +5,7 @@
 
  as well as some code borrowed from https://github.com/Vorono4ka/XCoder and https://github.com/Vorono4ka/sc-compression thank you!
 
- As of right now this editor is basically only capable of the things the Ultrapowa editor is capable of but it will run on any device except windows
+ As of right now this editor is basically only capable of the things the Ultrapowa editor is capable of but it will run on any device unlike ultrapowa (only runs windows)
 
 ## Known Bugs:
 
