@@ -3,12 +3,17 @@ from sc_objects.shape_chunk import ShapeChunk
 from utils.reader import Reader
 from utils.writer import Writer
 from math import ceil
+import PIL
 from PIL import Image
 
 class Shape(ScObject):
     def __init__(self, main_sc, data, data_type: int):
         ScObject.__init__(self, main_sc, data, data_type)
         self.chunks = []
+
+    def round_school(self, x):
+        i, f = divmod(x, 1)
+        return int(i + ((f >= 0.5) if (x > 0) else (f > 0.5)))
 
     def parse_data(self):
         reader = Reader(self.data, 'little')
@@ -40,7 +45,7 @@ class Shape(ScObject):
     def bounding_box(points):
         x_coordinates, y_coordinates = zip(*points)
 
-        return [(min(x_coordinates), min(y_coordinates)), (max(x_coordinates), max(y_coordinates))]
+        return [(min(x_coordinates), max(y_coordinates)), (max(x_coordinates), min(y_coordinates))] #Top left corner, Bottom right corner
 
     def render(self) -> bytes:
         shape_left = 0
@@ -54,7 +59,7 @@ class Shape(ScObject):
             shape_bottom = max(shape_bottom, max(point[1] for point in chunk.xy_points))
 
         width, height = shape_right - shape_left, shape_bottom - shape_top
-        size = ceil(width), ceil(height)
+        size = self.round_school(width), self.round_school(height)
 
         image = Image.new('RGBA', size)
 
@@ -65,8 +70,12 @@ class Shape(ScObject):
             left = min(point[0] for point in chunk.xy_points)
             top = min(point[1] for point in chunk.xy_points)
 
-            x = int(left + abs(shape_left))
-            y = int(top + abs(shape_top))
+            if chunk.xy_points[0][0] - chunk.xy_points[1][0] > 0:
+                #Mirror x
+                rendered_region = rendered_region.transpose(PIL.Image.FLIP_LEFT_RIGHT)
+
+            x = self.round_school(left + abs(shape_left))
+            y = self.round_school(top + abs(shape_top))
 
             image.paste(rendered_region, (x, y), rendered_region)
 

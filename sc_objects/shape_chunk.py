@@ -14,6 +14,10 @@ class ShapeChunk(ScObject):
         self.chunk_id = None
         self.shape_id = None
 
+    def round_school(self, x):
+        i, f = divmod(x, 1)
+        return int(i + ((f >= 0.5) if (x > 0) else (f > 0.5)))
+
 
     def parse_data(self):
         reader = Reader(self.data, 'little')
@@ -24,8 +28,8 @@ class ShapeChunk(ScObject):
 
         print("\n\n")
         for i in range(shape_point_count):
-            x = reader.readInt32() * 0.05
-            y = reader.readInt32() * 0.05
+            x = reader.readInt32() * 0.1
+            y = reader.readInt32() * 0.1
 
             # reader.i -= 8
             # print(f"x bytes: {reader.read(4)}, y bytes: {reader.read(4)}")
@@ -100,12 +104,12 @@ class ShapeChunk(ScObject):
         writer.writeByte(len(self.uv_points)) #shape point count
 
         for point in self.xy_points:
-            writer.writeInt32(int(point[0] / 0.05)) # x
-            writer.writeInt32(int(point[1] / 0.05)) # y
+            writer.writeInt32(int(point[0] / 0.1)) # x
+            writer.writeInt32(int(point[1] / 0.1)) # y
         if self.chunk_type == 22:
             for point in self.uv_points:
-                writer.writeUInt16(int((point[0] / texture.image.width) * 65535)) # u
-                writer.writeUInt16(int((point[1] / texture.image.height) * 65535)) # v
+                writer.writeUInt16(self.round_school((point[0] / texture.image.width) * 65535)) # u
+                writer.writeUInt16(self.round_school((point[1] / texture.image.height) * 65535)) # v
         else:
             for point in self.uv_points:
                 writer.writeUInt16(point[0]) # u

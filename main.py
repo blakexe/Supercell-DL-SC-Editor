@@ -120,6 +120,7 @@ def clicked_renderable(event):
         chunk_index = values[0]
         shape_index = values[1]
         sc_object = curr_sc.shapes[shape_index].chunks[chunk_index]
+        print(f"\n\n{sc_object.xy_points}\n\n")
     elif "texture" in tags:
         sc_object = curr_sc.textures[values[0]]
     else:
