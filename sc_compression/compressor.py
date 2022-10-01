@@ -2,7 +2,7 @@ import lzma
 from hashlib import md5
 
 from sc_compression.signatures import Signatures
-from sc_compression.utils.writer import Writer
+from utils.writer import Writer
 
 try:
     import lzham

@@ -54,12 +54,13 @@ class SC():
         for i in range(self.export_count):
             name_length = reader.readUInt8()
             name = reader.readChar(name_length)
-            print(name)
 
             #Find the ID in movie clip info based on its order
             key = next(key for key, value in self.movie_clip_info.items() if value == i)
 
             self.movie_clip_info[key] = name
+
+            print(f"{key}: {name}")
 
         #Get actual data
         while True:
@@ -68,6 +69,11 @@ class SC():
 
             if data_type == 0:
                 #EOF
+
+                #Parse movieclips
+                # for movieclip in self.movieclips:
+                #     movieclip.parse_data()
+
                 return
 
             #Get next set of data
@@ -78,16 +84,21 @@ class SC():
                 #Texture
                 texture = Texture(self, data, data_type)
                 self.textures.append(texture)
-            # elif data_type in (2, 18):
+            elif data_type in (2, 18):
                 #Shape
-                # shape = Shape(self, data, data_type)
-                # self.shapes.append(shape)
-                # shape.parse_data()
-            # elif data_type in (3, 10, 12, 14):
+                shape = Shape(self, data, data_type)
+                self.shapes.append(shape)
+                shape.parse_data()
+            elif data_type in (3, 10, 12, 14):
                 #Movieclip
-                # movieclip = MovieClip(self, data, data_type)
-                # self.movieclips.append(movieclip)
-                # movieclip.parse_data()
+                try:
+                    movieclip = MovieClip(self, data, data_type)
+                    movieclip.parse_data()
+                    self.movieclips.append(movieclip)
+                except:
+                    print("Skipping movie clip due to error")
+                    sc_object = ScObject(self, data, data_type)
+                    self.unknowns.append(sc_object)
 
             # elif data_type in (7, 15, 20):
                 #Textfield
@@ -105,7 +116,6 @@ class SC():
                 #Unknown type
                 sc_object = ScObject(self, data, data_type)
                 self.unknowns.append(sc_object)
-                pass
 
     def export_sc(self) -> bytes:
         writer = Writer('little')
@@ -128,6 +138,17 @@ class SC():
             writer.writeUInt8(len(value))
             writer.writeChar(value)
 
+        # writer.writeUInt16(len([movieclip for movieclip in self.movieclips if movieclip.export_name != None]))
+
+        # for movieclip in self.movieclips:
+        #     if movieclip.export_name != None:
+        #         writer.writeInt16(movieclip.clip_id)
+
+        # for movieclip in self.movieclips:
+        #     if movieclip.export_name != None:
+        #         writer.writeUInt8(len(movieclip.export_name))
+        #         writer.writeChar(movieclip.export_name)
+
         all_objects = self.textures + self.shapes + self.movieclips + self.textfields + self.matrix2x3 + self.colortransforms + self.unknowns
 
         for object in all_objects:
@@ -138,8 +159,8 @@ class SC():
             writer.writeInt32(len(data))
             writer.write(data)
         
-        writer.writeUByte(0) #1 Byte
-        writer.writeInt32(0) #4 Bytes
+        writer.writeUByte(0) #1 Byte "type"
+        writer.writeInt32(0) #4 Bytes "length"
 
         return writer.buffer
 

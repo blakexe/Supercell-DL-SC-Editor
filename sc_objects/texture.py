@@ -18,7 +18,7 @@ class Texture(ScObject):
         for h in range(self.height):
             column = []
             for w in range(self.width):
-                color = reader.readUint16()
+                color = reader.readUInt16()
 
                 r = ((color >> 11) & 0x1F) << 3
                 g = ((color >> 5) & 0x3F) << 2
@@ -40,7 +40,7 @@ class Texture(ScObject):
         for h in range(self.height):
             column = []
             for w in range(self.width):
-                color = reader.readUint16()
+                color = reader.readUInt16()
 
                 r = ((color >> 12) & 0xF) << 4
                 g = ((color >> 8) & 0xF) << 4
@@ -92,23 +92,11 @@ class Texture(ScObject):
         writer.writeUInt16(self.image.width)
         writer.writeUInt16(self.image.height)
 
-        pixels = self.image.load()
+        self.image = self.image.convert("RGBA")
 
-        for y in range(self.image.height):
-            for x in range(self.image.width):
-                colors = pixels[x, y]
-                r = colors[0]
-                g = colors[1]
-                b = colors[2]
-                if len(colors) == 4:
-                    a = colors[3]
-                else:
-                    a = 255
-
-                writer.writeUByte(r)
-                writer.writeUByte(g)
-                writer.writeUByte(b)
-                writer.writeUByte(a)
+        writer.buffer += np.array(self.image).tobytes()
         
         return writer.buffer
-                
+
+    def render(self) -> Image:
+        return self.image
