@@ -44,6 +44,18 @@ class ShapeChunk(ScObject):
                 self.uv_points.append((u, v))
                 print(f"u: {u}, v: {v}")
         print(f"\n\n")
+
+    def render_polygon(self) -> Image:
+        texture_image = self.main_sc.textures[self.texture_id].image
+
+        mask_im = Image.new("RGBA", texture_image.size)
+
+        mask_drawer = ImageDraw.Draw(mask_im) #PIL Drawing methods
+        mask_drawer.polygon(self.uv_points, fill=None, outline="#4287f5")
+
+        mask_im = mask_im.crop(mask_im.getbbox())
+
+        return mask_im
                 
     def render(self) -> Image:
         texture_image = self.main_sc.textures[self.texture_id].image

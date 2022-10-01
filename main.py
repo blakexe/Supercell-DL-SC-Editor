@@ -18,6 +18,8 @@ curr_sc = SC()
 last_dir = dir_path
 last_file = ""
 
+show_polygons = True
+
 #Create structure
 root = Tk()
 toolbar = Menu(root)
@@ -59,6 +61,25 @@ toolbar.add_cascade(label='File', menu=file_cascade)
 
 tools_cascade = Menu(toolbar)
 toolbar.add_cascade(label='Tools', menu=tools_cascade)
+
+showstuff_cascade = Menu(toolbar)
+toolbar.add_cascade(label='Show', menu=showstuff_cascade)
+
+def show_chunk_polygon():
+    global show_polygons
+
+    show_polygons = True
+    showstuff_cascade.entryconfig("Show Chunk Polygon", state="disabled")
+    showstuff_cascade.entryconfig("Hide Chunk Polygon", state="normal")
+    clicked_renderable(None)
+
+def hide_chunk_polygon():
+    global show_polygons
+
+    show_polygons = False
+    showstuff_cascade.entryconfig("Show Chunk Polygon", state="normal")
+    showstuff_cascade.entryconfig("Hide Chunk Polygon", state="disabled")
+    clicked_renderable(None)
 
 def export_chunk():
     try:
@@ -120,13 +141,16 @@ def clicked_renderable(event):
         chunk_index = values[0]
         shape_index = values[1]
         sc_object = curr_sc.shapes[shape_index].chunks[chunk_index]
-        print(f"\n\n{sc_object.xy_points}\n\n")
+        # print(f"\n\n{sc_object.xy_points}\n\n")
     elif "texture" in tags:
         sc_object = curr_sc.textures[values[0]]
     else:
         return
     
     render = sc_object.render()
+
+    if show_polygons and "shape_chunk" in tags:
+        render = Image.alpha_composite(render, sc_object.render_polygon())
 
     tk_image = ImageTk.PhotoImage(render)
 
@@ -266,6 +290,11 @@ def start():
     tools_cascade.add_command(label='Export Chunk Image', command=export_chunk)
     tools_cascade.entryconfig("Replace Chunk Image", state="disabled")
     tools_cascade.entryconfig("Export Chunk Image", state="disabled")
+
+    #'Show' options
+    showstuff_cascade.add_command(label='Show Chunk Polygon', command=show_chunk_polygon)
+    showstuff_cascade.add_command(label='Hide Chunk Polygon', command=hide_chunk_polygon)
+    showstuff_cascade.entryconfig("Show Chunk Polygon", state="disabled")
 
     #Setup
     root.title("Magic Emote Editor")
