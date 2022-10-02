@@ -81,6 +81,44 @@ def hide_chunk_polygon():
     showstuff_cascade.entryconfig("Hide Chunk Polygon", state="disabled")
     clicked_renderable(None)
 
+def import_texture():
+    global last_dir
+
+    path = filedialog.askopenfilename(title="Select an image", initialdir=last_dir, filetypes=[('image', '*.*')])
+
+    if path == "":
+        return
+    last_dir = os.path.dirname(path)
+
+    item = tree_browser.item(tree_browser.focus())
+    values = item['values']
+    texture_id = values[0]
+    texture = curr_sc.textures[texture_id]
+
+    texture.image = Image.open(path)
+
+    clicked_renderable(None)
+
+def export_texture():
+    try:
+        path = filedialog.asksaveasfile(mode="w", defaultextension=".png", initialdir=last_dir)
+    except AssertionError:
+        showerror(title="Error", message="Please pick a directory, not a file.")
+
+    if path is None:
+        return
+
+    item = tree_browser.item(tree_browser.focus())
+    values = item['values']
+
+    texture_id = values[0]
+
+    texture = curr_sc.textures[texture_id]
+
+    image = texture.image
+
+    image.save(path.name, "PNG")
+
 def export_chunk():
     try:
         path = filedialog.asksaveasfile(mode="w", defaultextension=".png", initialdir=last_dir)
@@ -130,14 +168,9 @@ def clicked_renderable(event):
     tags = item['tags']
     values = item['values']
 
-    tools_cascade.entryconfig("Replace Chunk Image", state="disabled")
-    tools_cascade.entryconfig("Export Chunk Image", state="disabled")
-
     if "shape" in tags:
         sc_object = curr_sc.shapes[values[0]]
     elif "shape_chunk" in tags:
-        tools_cascade.entryconfig("Replace Chunk Image", state="normal")
-        tools_cascade.entryconfig("Export Chunk Image", state="normal")
         chunk_index = values[0]
         shape_index = values[1]
         sc_object = curr_sc.shapes[shape_index].chunks[chunk_index]
@@ -279,6 +312,22 @@ def open_sc():
     # except Exception as e:
     #     showerror("Error has occured:", str(e))
 
+def clicked_treeview(event):
+    item = tree_browser.item(tree_browser.focus())
+    tags = item['tags']
+
+    tools_cascade.entryconfig("Replace Chunk Image", state="disabled")
+    tools_cascade.entryconfig("Export Chunk Image", state="disabled")
+    tools_cascade.entryconfig("Export Texture", state="disabled")
+    tools_cascade.entryconfig("Import Texture", state="disabled")
+
+    if "shape_chunk" in tags:
+        tools_cascade.entryconfig("Replace Chunk Image", state="normal")
+        tools_cascade.entryconfig("Export Chunk Image", state="normal")
+    elif "texture" in tags:
+        tools_cascade.entryconfig("Export Texture", state="normal")
+        tools_cascade.entryconfig("Import Texture", state="normal")
+
 def start():
     #'File' options
     file_cascade.add_command(label='Open', command=open_sc)
@@ -288,8 +337,13 @@ def start():
     #'Tools' options
     tools_cascade.add_command(label='Replace Chunk Image', command=replace_chunk)
     tools_cascade.add_command(label='Export Chunk Image', command=export_chunk)
+    tools_cascade.add_command(label='Export Texture', command=export_texture)
+    tools_cascade.add_command(label='Import Texture', command=import_texture)
+
     tools_cascade.entryconfig("Replace Chunk Image", state="disabled")
     tools_cascade.entryconfig("Export Chunk Image", state="disabled")
+    tools_cascade.entryconfig("Export Texture", state="disabled")
+    tools_cascade.entryconfig("Import Texture", state="disabled")
 
     #'Show' options
     showstuff_cascade.add_command(label='Show Chunk Polygon', command=show_chunk_polygon)
@@ -299,6 +353,8 @@ def start():
     #Setup
     root.title("Magic Emote Editor")
     root.geometry('720x512')
+
+    tree_browser.bind('<<TreeviewSelect>>', clicked_treeview)
 
     root.config(menu=toolbar)
 
