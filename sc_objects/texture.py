@@ -94,7 +94,13 @@ class Texture(ScObject):
 
         self.image = self.image.convert("RGBA")
 
-        writer.buffer += np.array(self.image).tobytes()
+        array = np.array(self.image)
+
+        #Clear all pixels with RGBA value (255, 255, 255, 0) to (0, 0, 0, 0)
+        clear = np.zeros_like(array) + [0, 0, 0, 0]
+        array = np.where((array==[255,255,255,0]).all(axis=-1)[...,None], clear, array)
+
+        writer.buffer += array.astype(np.uint8).tobytes()
         
         return writer.buffer
 

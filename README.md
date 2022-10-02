@@ -9,9 +9,7 @@
 
 ## Known Bugs:
 
- Replacing image chunk with image that has a different alpha channel from the original is ignored in game (no idea why, urgently trying to fix)
-
- Exporting a chunk image on MacOS and selecting a file that is not a PNG totally crashes the program. This is a weird bug with tkinter and MacOS
+ - Exporting a chunk image on MacOS and selecting a file that is not a PNG totally crashes the program. This is a weird bug with tkinter and MacOS
 
 ## Features:
 
@@ -31,7 +29,7 @@
 ## Command line tool usage:
  To use simply just run `python command_line_tools.py -path-to-sc`
 
- with arguments either `--export` to get the texture or `--importpng path` to import a texture (Warning weird problems will occur when importing into a game)
+ with arguments either `--export` to get the texture or `--importpng path` to import a texture
 
 ## GUI Usage
  Run the program with `python main.py` and from there you can open an _dl.sc file and edit it.
