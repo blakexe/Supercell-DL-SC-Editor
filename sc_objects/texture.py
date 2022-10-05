@@ -96,9 +96,8 @@ class Texture(ScObject):
 
         array = np.array(self.image)
 
-        #Clear all pixels with RGBA value (255, 255, 255, 0) to (0, 0, 0, 0)
-        clear = np.zeros_like(array) + [0, 0, 0, 0]
-        array = np.where((array==[255,255,255,0]).all(axis=-1)[...,None], clear, array)
+        #If a pixel has an alpha value of 0, set all pixels to 0 to prevent alpha bug in game
+        array[array[:,:,3]==0] = [0,0,0,0]
 
         writer.buffer += array.astype(np.uint8).tobytes()
         
