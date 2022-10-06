@@ -1,5 +1,5 @@
 # SC-Magic-Emote-Animator
- An animator tool for _dl.sc files from Supercell games like Clash Royale, Hayday, Clash of Clans, Brawl Stars, Boom Beach, etc.
+ A tool to edit animations (for now just sprites) for _dl.sc files from Supercell games like Clash Royale, Hayday, Clash of Clans, Brawl Stars, Boom Beach, etc.
 
  This was partially ported from https://github.com/jeanbmar/Ultrapowa-SC-Editor
 
